@@ -1,0 +1,405 @@
+================================================================================
+                    FINAL YEAR PROJECT (FYP) — TECHNICAL DOCUMENT
+================================================================================
+
+                         S H O P V E R S E
+              Multi-Vendor E-Commerce Platform with Analytics
+
+          A Web Application Using React, Node.js, and MongoDB (MERN)
+
+--------------------------------------------------------------------------------
+  Document type     : Project / Thesis companion (English)
+  Intended use      : Submission, viva preparation, supervisor briefing
+  Stack             : MERN + supporting services (see Section 4)
+--------------------------------------------------------------------------------
+
+
+================================================================================
+  TABLE OF CONTENTS
+================================================================================
+
+  1.  Executive Summary
+  2.  Introduction & Problem Statement
+  3.  Aims & Objectives
+  4.  Technology Stack & Tools
+  5.  System Architecture
+  6.  Functional Description (Modules)
+  7.  Database & Data Model (Overview)
+  8.  Security & Quality Practices
+  9.  User Roles & Access Control
+ 10.  Deployment & Environment Notes
+ 11.  Testing & Demonstration Strategy
+ 12.  Limitations & Future Enhancements
+ 13.  Conclusion
+ 14.  References & Further Reading (suggested)
+
+
+================================================================================
+  1. EXECUTIVE SUMMARY
+================================================================================
+
+ShopVerse is a full-stack, multi-vendor electronic commerce platform designed
+for a Final Year Project (FYP) context. It allows multiple independent sellers
+to list products under their own stores while customers browse, search, compare,
+and purchase goods through a unified marketplace experience.
+
+The system emphasises:
+  • Role-based access (customer, seller, administrator)
+  • A modern, responsive user interface suitable for desktop and mobile
+  • Seller-side business analytics (charts, summaries, order visibility)
+  • Core e-commerce flows: catalogue, cart, checkout, orders, reviews, wishlist
+  • RESTful API design on the backend with JWT authentication
+
+The implementation follows the MERN pattern: MongoDB for persistence, Express
+and Node.js for the API layer, and React for the client application. Optional
+integrations (e.g. Cloudinary for media, Stripe for payments) support a
+production-like feature set where configured.
+
+
+================================================================================
+  2. INTRODUCTION & PROBLEM STATEMENT
+================================================================================
+
+2.1  Context
+------------
+E-commerce has become essential for retail and small businesses. Many sellers
+lack the resources to build standalone shops; conversely, customers prefer
+centralised marketplaces for discovery, trust signals (reviews, verified
+sellers), and consistent checkout.
+
+2.2  Problem Statement
+------------------------
+Small and medium sellers need an affordable way to reach buyers online, while
+buyers need a single platform to discover products, compare sellers, and
+complete purchases safely. A multi-vendor platform addresses both sides:
+sellers gain storefronts and analytics; customers gain choice and convenience.
+
+2.3  Proposed Solution
+----------------------
+ShopVerse provides a web-based marketplace where:
+  • Sellers register, obtain a store, and manage products and orders
+  • Customers register, build wishlists, place orders, and track activity
+  • Administrators oversee users, stores, and platform-wide data where applicable
+
+The project demonstrates software engineering skills: requirements analysis,
+system design, API design, UI/UX implementation, security awareness, and
+documentation suitable for academic evaluation.
+
+
+================================================================================
+  3. AIMS & OBJECTIVES
+================================================================================
+
+Primary Aim
+------------
+To design and implement a functional, multi-vendor e-commerce web application with
+seller analytics and a professional user experience.
+
+Specific Objectives
+-------------------
+  O1   Implement secure user registration and login with role-based routing.
+  O2   Provide product catalogue with search, filter, sort, and detail views.
+  O3   Support shopping cart and a guided checkout experience.
+  O4   Enable sellers to create and manage products linked to their store.
+  O5   Display seller dashboard metrics and charts (e.g. revenue, orders).
+  O6   Implement product reviews and ratings to support trust and feedback.
+  O7   Maintain clear separation between frontend, backend, and database layers.
+  O8   Document the system for FYP submission and oral defence (this file).
+
+
+================================================================================
+  4. TECHNOLOGY STACK & TOOLS
+================================================================================
+
+4.1  Frontend
+-------------
+  • React (with Vite for fast development and optimised builds)
+  • Tailwind CSS for utility-first styling
+  • Framer Motion for interface motion and polish
+  • React Router for client-side navigation
+  • Zustand for lightweight global state (e.g. auth, cart)
+  • Axios for HTTP requests to the REST API
+  • Recharts for dashboard visualisations
+  • Lucide React for consistent iconography
+  • Additional UX libraries as integrated in the project (e.g. toast notifications)
+
+4.2  Backend
+------------
+  • Node.js runtime
+  • Express.js web framework
+  • Mongoose ODM for MongoDB modelling and validation
+  • JWT for stateless authentication
+  • bcryptjs for password hashing
+  • Helmet, CORS, express-rate-limit for baseline API hardening
+  • Socket.IO for real-time capabilities (where enabled)
+  • Optional: Stripe (payments), Cloudinary (image uploads), Nodemailer (email)
+
+4.3  Database
+---------------
+  • MongoDB (document store; flexible schema for products, orders, reviews)
+
+4.4  Development & Quality
+---------------------------
+  • Environment-based configuration (.env)
+  • Database seeding script for repeatable demo data
+  • Separation of routes, models, and middleware for maintainability
+
+
+================================================================================
+  5. SYSTEM ARCHITECTURE
+================================================================================
+
+5.1  High-Level Architecture
+-------------------------------
+The system follows a classic three-tier architecture:
+
+  [ Browser — React SPA ]
+            |
+            |  HTTPS / REST (JSON)
+            v
+  [ Node.js — Express API ]
+            |
+            |  ODM (Mongoose)
+            v
+  [ MongoDB ]
+
+The frontend communicates only with the backend API. Sensitive operations
+(e.g. password verification, order creation, role checks) are enforced on the
+server, not solely in the client.
+
+5.2  API Organisation (Conceptual)
+-----------------------------------
+Typical route groups include:
+  • /api/auth       — registration, login, profile, password, admin user listing
+  • /api/products   — catalogue, CRUD (seller), wishlist toggles, reviews linkage
+  • /api/orders     — customer orders, seller orders, status updates
+  • /api/stores     — public store listing and store detail
+  • /api/analytics  — seller (and platform) analytics where implemented
+  • /api/upload     — protected media upload (e.g. Cloudinary)
+  • /api/payment    — payment-related endpoints where Stripe is configured
+
+5.3  Real-Time Layer (Where Used)
+----------------------------------
+Socket.IO may be used for notifications or live updates. The architecture allows
+the HTTP API to remain the source of truth for transactional data while sockets
+enhance responsiveness.
+
+
+================================================================================
+  6. FUNCTIONAL DESCRIPTION (MODULES)
+================================================================================
+
+6.1  Public Storefront & Marketing Home
+----------------------------------------
+  • Landing page with hero, categories, promotional sections, and featured items
+  • Navigation to product listing, store directory, cart, and authentication
+
+6.2  Product Discovery
+-----------------------
+  • Product listing with filters (e.g. category, search keyword)
+  • Sorting options (e.g. featured, newest, popular)
+  • Product detail page: images, price, discount, description, reviews, wishlist
+
+6.3  Authentication & Profiles
+---------------------------------
+  • Customer and seller registration; distinct flows where store creation applies
+  • Login with JWT storage and protected routes
+  • Profile area: personal details, optional bio, avatar upload (via API),
+    saved addresses, password change, preferences (device-local where applicable)
+
+6.4  Shopping Cart & Checkout
+------------------------------
+  • Persistent cart (client-side store with local persistence pattern)
+  • Checkout steps: delivery information, payment method selection, review
+  • Order submission validates stock and resolves product/store identifiers server-side
+
+6.5  Orders
+------------
+  • Customers view order history and statuses
+  • Sellers view orders for their store; administrators may view broader data
+  • Status updates flow through authorised API endpoints
+
+6.6  Seller Dashboard
+-----------------------
+  • Overview metrics (revenue, orders, products, reviews)
+  • Charts for trends and distributions (Recharts)
+  • Product management: create, edit, list, delete (within permissions)
+  • Optional: automatic or suggested imagery for new listings (UX enhancement)
+
+6.7  Admin Dashboard (Where Implemented)
+-----------------------------------------
+  • Consolidated view of users, stores, orders, or products for governance
+  • Role-restricted access on both API and frontend routes
+
+6.8  Reviews & Ratings
+-----------------------
+  • Customers submit reviews linked to products
+  • Aggregate rating logic maintained in the data layer (e.g. post-save hooks)
+
+6.9  Wishlist
+--------------
+  • Authenticated users add/remove wishlist items
+  • Dedicated wishlist page reads populated or ID-based wishlist data robustly
+
+6.10 Store Pages
+-----------------
+  • Directory of approved stores and individual store pages with featured products
+
+
+================================================================================
+  7. DATABASE & DATA MODEL (OVERVIEW)
+================================================================================
+
+Core entities (conceptual — exact fields in Mongoose schemas):
+  • User          — identity, credentials (hashed), role, wishlist, addresses, avatar
+  • Store         — seller storefront, approval flags, category, branding fields
+  • Product       — catalogue item, pricing, stock, images, store reference
+  • Order         — customer, line items, totals, shipping, payment, status history
+  • Review        — rating, comment, product and user linkage
+
+Relationships are expressed via ObjectId references (e.g. Product → Store,
+Order → User). Indexing and validation rules in Mongoose support data integrity.
+
+
+================================================================================
+  8. SECURITY & QUALITY PRACTICES
+================================================================================
+
+  • Passwords never stored in plain text (bcrypt hashing on save)
+  • JWT-based authentication; protected routes use middleware verification
+  • Role-based authorisation for seller and admin operations
+  • HTTP security headers (Helmet), CORS policy, rate limiting against abuse
+  • Input validation on models and pragmatic checks in controllers
+  • Separation of concerns: thin routes, reusable middleware, central error handler
+
+Students should be prepared to discuss trade-offs (e.g. JWT expiry, refresh
+tokens, HTTPS in production, secrets management).
+
+
+================================================================================
+  9. USER ROLES & ACCESS CONTROL
+================================================================================
+
+  Customer   — Browse, purchase, wishlist, reviews, profile, orders
+  Seller     — Store ownership, product CRUD, order handling, analytics dashboard
+  Admin      — Elevated visibility and management features as implemented in routes/UI
+
+The frontend hides or redirects unauthorised pages; the backend must always
+enforce the same rules to prevent API abuse.
+
+
+================================================================================
+ 10. DEPLOYMENT & ENVIRONMENT NOTES
+================================================================================
+
+Typical environment variables (examples — consult project .env.example if present):
+  • MONGO_URI           — MongoDB connection string
+  • JWT_SECRET          — signing secret for tokens
+  • CLIENT_URL          — allowed frontend origin for CORS
+  • CLOUDINARY_*        — optional image hosting
+  • STRIPE_*            — optional payment integration
+
+Production checklist (thesis talking points):
+  • Use HTTPS, secure cookies or token storage strategy, strong secrets
+  • Process manager (e.g. PM2), logging, and monitoring
+  • Database backups and indexing review
+
+
+================================================================================
+ 11. TESTING & DEMONSTRATION STRATEGY
+================================================================================
+
+Recommended demonstration flow for viva or supervisor review:
+  1. Seed the database and start backend and frontend dev servers.
+  2. Log in as customer — browse, wishlist, add to cart, checkout (as configured).
+  3. Log in as seller — create/edit product, observe dashboard analytics.
+  4. Log in as admin — show oversight screens if enabled.
+  5. Discuss one technical depth: e.g. JWT middleware, order stock decrement, or hooks.
+
+Testing layers:
+  • Manual exploratory testing of critical paths
+  • Optional: API tests (Postman / automated) for regression on core endpoints
+
+
+================================================================================
+ 12. LIMITATIONS & FUTURE ENHANCEMENTS
+================================================================================
+
+Realistic limitations (honesty strengthens a thesis defence):
+  • Scale: single-region demo; sharding and CDN not in scope
+  • Payments: sandbox vs production compliance (PCI, webhooks) need careful study
+  • Email verification and password recovery flows may be partial or demo-grade
+  • Advanced search (Elasticsearch), recommendations ML, and mobile apps are extensions
+
+Future work ideas:
+  • Refresh tokens and OAuth social login
+  • Advanced inventory (variants, warehouses)
+  • Mobile application (React Native) sharing the same API
+  • Fraud detection and seller verification workflows
+  • Internationalisation (Urdu / English toggle at scale)
+
+
+================================================================================
+ 13. CONCLUSION
+================================================================================
+
+ShopVerse demonstrates a complete MERN-stack implementation of a multi-vendor
+e-commerce platform suitable for a Final Year Project. It combines a polished
+user interface with a structured backend, role-based security, and practical
+features such as analytics, wishlists, and order management.
+
+The project shows competency in full-stack development, API design, database
+modelling, and user-centred design — all central outcomes expected of a strong
+FYP submission.
+
+
+================================================================================
+ 14. REFERENCES & FURTHER READING (SUGGESTED)
+================================================================================
+
+  • MongoDB Documentation — https://www.mongodb.com/docs/
+  • Mongoose Documentation — https://mongoosejs.com/docs/
+  • Express.js Guide — https://expressjs.com/
+  • React Documentation — https://react.dev/
+  • OWASP Top Ten (web security awareness) — https://owasp.org/www-project-top-ten/
+  • JWT Introduction — RFC 7519 and vendor-neutral tutorials
+
+(Add your university citation style and any papers or books your supervisor
+ recommends.)
+
+
+================================================================================
+  APPENDIX A — DEMO ACCOUNTS (FROM PROJECT README)
+================================================================================
+
+  Role       | Email               | Password
+  -----------|---------------------|----------
+  Customer   | customer@demo.com   | demo123
+  Seller     | seller@demo.com     | demo123
+  Admin      | admin@demo.com      | demo123
+
+Default URLs (development):
+  • Frontend:  http://localhost:5173
+  • Backend:   http://localhost:5000  (API health may be at /api/health)
+
+
+================================================================================
+  APPENDIX B — PROJECT DIRECTORY (HIGH LEVEL)
+================================================================================
+
+  fyp-ecommerce/
+    backend/          — Express API, models, routes, middleware, seeder
+    frontend/         — React SPA, pages, components, stores, utilities
+    README.md         — Quick start instructions
+
+
+================================================================================
+                         END OF DOCUMENT
+================================================================================
+
+Prepared as a thesis-style technical companion for the ShopVerse FYP project.
+You may copy sections into your formal thesis template (Word/LaTeX) and expand
+with diagrams: use-case diagram, ER diagram, sequence diagram for checkout, and
+screenshots of the implemented UI.
+
+================================================================================
